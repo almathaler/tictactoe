@@ -29,7 +29,7 @@ Transformations = [[Rot90],[Rot180],[Rot270],[VertFlip],[Rot90,VertFlip],[Rot180
 def isWinning(board):
     global wins
     for group in wins:
-        if board[group[1]] != -1 and board[group[0]] == board[group[1]] and board[group[1]] == board[group[2]]:
+        if board[group[1]] != '_' and board[group[0]] == board[group[1]] and board[group[1]] == board[group[2]]:
             return True
     return False
 
@@ -37,6 +37,14 @@ def print_board(board):
     print(board[0:3])
     print(board[3:6])
     print(board[6:9])
+    print()
+
+def check_transformation(board, list_of_boards):
+    #when you do this in the loop, the list_of_boards should be specific to
+    #that length board only. so if 4 pieces down u shouldn't be looking at
+    #boards w 3
+    #use and statements to short-circuit this procedure
+    return False
 '''
 A) Calculate the number of different possible games.
 Two games are different if the Nth move in each game is different,
@@ -45,38 +53,51 @@ for at least one value of N.
 #we're saying 1 is x and 0 is o
 def A():
     total_games = 0
+    total_boards = set()
     o_wins = 0
     x_wins = 0
     draws = 0
     for x1 in range(9):
-        board9 = [-1, -1, -1, -1, -1, -1, -1, -1, -1]
+        board9 = ['_', '_', '_', '_', '_', '_', '_', '_', '_']
         still_avail9 = [0, 1, 2, 3, 4, 5, 6, 7, 8]
         #print("filling in space %d with x, remaining spaces:"%x1)
         #print(still_avail9)
         still_avail8 = still_avail9[:]
         still_avail8.remove(x1)
-        board9[x1] = 1
+        board9[x1] = 'x'
+        #so we can add to a set
+        sb9 = ''.join(board9)
+        total_boards.add(sb9)
         for o1 in still_avail8:
             board8 = board9[:]
             still_avail7 = still_avail8[:] #is this ok? i just don't want seperate trees affecting each other
             still_avail7.remove(o1)
             #print("filling in space %d with o, remaining spaces:"%o1)
             #print(still_avail8)
-            board8[o1] = 0
+            board8[o1] = 'o'
+            #so we can add to a set
+            sb8 = ''.join(board8)
+            total_boards.add(sb8)
             for x2 in still_avail7:
                 board7 = board8[:]
                 still_avail6 = still_avail7[:] #is this ok? i just don't want seperate trees affecting each other
                 still_avail6.remove(x2)
                 #print("filling in space %d with x, remaining spaces:"%x2)
                 #print(still_avail7)
-                board7[x2] = 1
+                board7[x2] = 'x'
+                #so we can add to a set
+                sb7 = ''.join(board7)
+                total_boards.add(sb7)
                 for o2 in still_avail6:
                     board6 = board7[:]
                     still_avail5 = still_avail6[:] #is this ok? i just don't want seperate trees affecting each other
                     still_avail5.remove(o2)
                     #print("filling in space %d with o, remaining spaces:"%o2)
                     #print(still_avail6)
-                    board6[o2] = 0
+                    board6[o2] = 'o'
+                    #so we can add to a set
+                    sb6 = ''.join(board6)
+                    total_boards.add(sb6)
                     #have to start checking for wins now cuz there are 3
                     for x3 in still_avail5:
                         board5 = board6[:]
@@ -84,8 +105,12 @@ def A():
                         still_avail4.remove(x3)
                         #print("filling in space %d with x, remaining spaces:"%x3)
                         #print(still_avail5)
-                        board5[x3] = 1
+                        board5[x3] = 'x'
+                        #so we can add to a set
+                        sb5 = ''.join(board5)
+                        total_boards.add(sb5)
                         if isWinning(board5):
+                            #print("x won\n")
                             #print_board(board5)
                             total_games+=1
                             x_wins+=1
@@ -96,8 +121,12 @@ def A():
                                 still_avail3.remove(o3)
                                 #print("filling in space %d with o, remaining spaces:"%o3)
                                 #print(still_avail4)
-                                board4[o3] = 0
+                                board4[o3] = 'o'
+                                #so we can add to a set
+                                sb4 = ''.join(board4)
+                                total_boards.add(sb4)
                                 if isWinning(board4):
+                                    #print("o won\n")
                                     #print_board(board4)
                                     total_games+=1
                                     o_wins+=1
@@ -108,21 +137,43 @@ def A():
                                         still_avail2.remove(x4)
                                         #print("filling in space %d with x, remaining spaces:"%x4)
                                         #print(still_avail3)
-                                        board3[x4] = 1
+                                        board3[x4] = 'x'
+                                        #so we can add to a set
+                                        sb3 = ''.join(board3)
+                                        total_boards.add(sb3)
                                         if isWinning(board3):
+                                            #print("x won\n")
                                             #print_board(board3)
                                             total_games+=1
                                             x_wins+=1
                                         else:
                                             for o4 in still_avail2:
                                                 board2 = board3[:]
-                                                board2[o4] = 0
+                                                still_avail1 = still_avail2[:]
+                                                still_avail1.remove(o4)
+                                                board2[o4] = 'o'
+                                                #so we can add to a set
+                                                sb2 = ''.join(board2)
+                                                total_boards.add(sb2)
                                                 if isWinning(board2):
+                                                    #print("o won\n")
+                                                    #print_board(board2)
                                                     total_games+=1
                                                     o_wins+=1
-                                                else:
+                                                else: #'x5'
+                                                    #this is the last x that you're adding. oh we should check if this is a winn
+                                                    board2[still_avail1[0]] = 'x'
+                                                    #so we can add to a set
+                                                    sb2 = ''.join(board2)
+                                                    total_boards.add(sb2)
+                                                    if isWinning(board2):
+                                                        #print("x won\n")
+                                                        #print_board(board2)
+                                                        x_wins+=1
+                                                    else:
+                                                        draws+=1
                                                     total_games+=1
-                                                    draws+=1
+
                                             #i'm confused for this part. in reality when there are 2 spaces left,
                                             #there are 2 more board possible. you can put o one place, and  it either wins
                                             #or leads to putting down an x and that's a full board so either way that's +1.
@@ -132,26 +183,20 @@ def A():
                                             #total_games+=2
 
                                             #gotta elaborate for b3 and b2
-    return total_games, x_wins, o_wins, draws
+    return total_games, x_wins, o_wins, draws, len(total_boards)
 '''
 B) In how many of the total number of games:
 B-1) was a win by X?
 B-2) was a win by O?
 B-3) was a draw?
+DID THIS IN A
 '''
-def B1():
-    return 0
-def B2():
-    return 0
-def B3():
-    return 0
 '''
 C) Calculate the number of different possible board configurations
 in all possible games (not just final boards at ends of games,
 but all intermediate boards). Include the blank (beginning) board.
+DID THIS IN A
 '''
-def C():
-    return 0
 '''
 D) Most boards in C) above are reducible to other boards.
 Calculate the number of irreducible board families.
@@ -163,8 +208,7 @@ def D():
     return 0
 
 def main():
-    print("A: %d \t B1: %d \t B2: %d \t B3: %d"%(A()))
-    print("C: %d"%C())
+    print("A: %d \t B1: %d \t B2: %d \t B3: %d \t C: %d"%(A()))
     print("D: %d"%D())
 
 main()
