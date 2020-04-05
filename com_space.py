@@ -45,77 +45,94 @@ for at least one value of N.
 #we're saying 1 is x and 0 is o
 def A():
     total_games = 0
+    o_wins = 0
+    x_wins = 0
+    draws = 0
     for x1 in range(9):
         board9 = [-1, -1, -1, -1, -1, -1, -1, -1, -1]
         still_avail9 = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-        still_avail9.remove(x1)
-        print("filling in space %d with x, remaining spaces:"%x1)
-        print(still_avail9)
+        #print("filling in space %d with x, remaining spaces:"%x1)
+        #print(still_avail9)
         still_avail8 = still_avail9[:]
+        still_avail8.remove(x1)
         board9[x1] = 1
         for o1 in still_avail8:
             board8 = board9[:]
-            still_avail8.remove(o1)
             still_avail7 = still_avail8[:] #is this ok? i just don't want seperate trees affecting each other
-            print("filling in space %d with o, remaining spaces:"%o1)
-            print(still_avail8)
+            still_avail7.remove(o1)
+            #print("filling in space %d with o, remaining spaces:"%o1)
+            #print(still_avail8)
             board8[o1] = 0
             for x2 in still_avail7:
                 board7 = board8[:]
-                still_avail7.remove(x2)
                 still_avail6 = still_avail7[:] #is this ok? i just don't want seperate trees affecting each other
-                print("filling in space %d with x, remaining spaces:"%x2)
-                print(still_avail7)
+                still_avail6.remove(x2)
+                #print("filling in space %d with x, remaining spaces:"%x2)
+                #print(still_avail7)
                 board7[x2] = 1
                 for o2 in still_avail6:
                     board6 = board7[:]
-                    still_avail6.remove(o2)
                     still_avail5 = still_avail6[:] #is this ok? i just don't want seperate trees affecting each other
-                    print("filling in space %d with o, remaining spaces:"%o2)
-                    print(still_avail6)
+                    still_avail5.remove(o2)
+                    #print("filling in space %d with o, remaining spaces:"%o2)
+                    #print(still_avail6)
                     board6[o2] = 0
                     #have to start checking for wins now cuz there are 3
                     for x3 in still_avail5:
                         board5 = board6[:]
-                        still_avail5.remove(x3)
                         still_avail4 = still_avail5[:] #is this ok? i just don't want seperate trees affecting each other
-                        print("filling in space %d with x, remaining spaces:"%x3)
-                        print(still_avail5)
+                        still_avail4.remove(x3)
+                        #print("filling in space %d with x, remaining spaces:"%x3)
+                        #print(still_avail5)
                         board5[x3] = 1
                         if isWinning(board5):
-                            print_board(board5)
+                            #print_board(board5)
                             total_games+=1
+                            x_wins+=1
                         else:
                             for o3 in still_avail4:
                                 board4 = board5[:]
-                                still_avail4.remove(o3)
                                 still_avail3 = still_avail4[:] #is this ok? i just don't want seperate trees affecting each other
-                                print("filling in space %d with o, remaining spaces:"%o3)
-                                print(still_avail4)
+                                still_avail3.remove(o3)
+                                #print("filling in space %d with o, remaining spaces:"%o3)
+                                #print(still_avail4)
                                 board4[o3] = 0
                                 if isWinning(board4):
-                                    print_board(board4)
+                                    #print_board(board4)
                                     total_games+=1
+                                    o_wins+=1
                                 else:
                                     for x4 in still_avail3:
                                         board3 = board4[:]
-                                        still_avail3.remove(x4)
                                         still_avail2 = still_avail3[:]
-                                        print("filling in space %d with x, remaining spaces:"%x4)
-                                        print(still_avail3)
+                                        still_avail2.remove(x4)
+                                        #print("filling in space %d with x, remaining spaces:"%x4)
+                                        #print(still_avail3)
                                         board3[x4] = 1
                                         if isWinning(board3):
-                                            print_board(board3)
+                                            #print_board(board3)
                                             total_games+=1
+                                            x_wins+=1
                                         else:
+                                            for o4 in still_avail2:
+                                                board2 = board3[:]
+                                                board2[o4] = 0
+                                                if isWinning(board2):
+                                                    total_games+=1
+                                                    o_wins+=1
+                                                else:
+                                                    total_games+=1
+                                                    draws+=1
                                             #i'm confused for this part. in reality when there are 2 spaces left,
                                             #there are 2 more board possible. you can put o one place, and  it either wins
                                             #or leads to putting down an x and that's a full board so either way that's +1.
                                             #or you put the o in the other place, and that wins or again you just put x in the other
                                             #place and that's +1 too. so from here there are 2 more boards and
                                             #that's that
-                                            total_games+=2
-    return total_games
+                                            #total_games+=2
+
+                                            #gotta elaborate for b3 and b2
+    return total_games, x_wins, o_wins, draws
 '''
 B) In how many of the total number of games:
 B-1) was a win by X?
@@ -146,10 +163,7 @@ def D():
     return 0
 
 def main():
-    print("A: %d"%A())
-    print("B1: %d"%B1())
-    print("B2: %d"%B2())
-    print("B3: %d"%B3())
+    print("A: %d \t B1: %d \t B2: %d \t B3: %d"%(A()))
     print("C: %d"%C())
     print("D: %d"%D())
 
