@@ -200,7 +200,7 @@ def without_transformation(set_boards):
     VertFlip= [2,1,0,5,4,3,8,7,6]
     Transformations = [[Rot90],[Rot180],[Rot270],[VertFlip],[Rot90,VertFlip],[Rot180,VertFlip],[Rot270,VertFlip]]
     #now go thru each item in the list and remove
-    to_return = {}
+    tr = set()
     #i think having a for i in range(len(set)) and then indexing thru
     #each after that is ok, b/c all the iterations prior to the current set we
     #are on have already been compared w this one. no point in a double comparison
@@ -209,13 +209,28 @@ def without_transformation(set_boards):
     for i in range(length):
         #make the 7 transformations of this board
         board = list_boards[i]
-        print("processing board: ")
-        print_board(board)
-        #for j in range(i+1, length):
-
-            #make comparisons w i's transformations and all the other elements. if
-            #they're the same, don't add to to_return. if non are the same, then add to to_return
-    return to_return
+        r90 = ""
+        r180 = ""
+        r270 = ""
+        vflip = ""
+        vflip90 = ""
+        vflip180 = ""
+        vflip270 = ""
+        #make 90, 180, 270 and vert flip
+        for z in range(9):
+            r90 += board[Rot90[z]]
+            r180 += board[Rot180[z]]
+            r270 += board[Rot270[z]]
+            vflip += board[VertFlip[z]]
+        for y in range(9):
+            vflip90 += r90[VertFlip[y]]
+            vflip180 += r180[VertFlip[y]]
+            vflip270 += r270[VertFlip[y]]
+        #now check if any of these transformations are in the set
+        #if not, add this very board. if yes, don't add
+        if not((r90 in tr) or (r180 in tr) or (r270 in tr) or (vflip in tr) or (vflip90 in tr) or (vflip180 in tr) or (vflip270 in tr)):
+            tr.add(board)
+    return tr
 '''
 D) Most boards in C) above are reducible to other boards.
 Calculate the number of irreducible board families.
