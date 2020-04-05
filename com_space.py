@@ -20,11 +20,7 @@ class SaveState:
 #globals
 wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
 # Transformations (rotations are counter-clockwise)
-Rot90 = [6,3,0,7,4,1,8,5,2]
-Rot180 = [8,7,6,5,4,3,2,1,0]
-Rot270 = [2,5,8,1,4,7,0,3,6]
-VertFlip= [2,1,0,5,4,3,8,7,6]
-Transformations = [[Rot90],[Rot180],[Rot270],[VertFlip],[Rot90,VertFlip],[Rot180,VertFlip],[Rot270,VertFlip]]
+
 
 def isWinning(board):
     global wins
@@ -39,12 +35,7 @@ def print_board(board):
     print(board[6:9])
     print()
 
-def check_transformation(board, list_of_boards):
-    #when you do this in the loop, the list_of_boards should be specific to
-    #that length board only. so if 4 pieces down u shouldn't be looking at
-    #boards w 3
-    #use and statements to short-circuit this procedure
-    return False
+
 '''
 A) Calculate the number of different possible games.
 Two games are different if the Nth move in each game is different,
@@ -183,7 +174,7 @@ def A():
                                             #total_games+=2
 
                                             #gotta elaborate for b3 and b2
-    return total_games, x_wins, o_wins, draws, len(total_boards)
+    return total_games, x_wins, o_wins, draws, len(total_boards), total_boards
 '''
 B) In how many of the total number of games:
 B-1) was a win by X?
@@ -197,6 +188,34 @@ in all possible games (not just final boards at ends of games,
 but all intermediate boards). Include the blank (beginning) board.
 DID THIS IN A
 '''
+
+'''
+goes through the set of boards given, and
+returns a new set without transformations
+'''
+def without_transformation(set_boards):
+    Rot90 = [6,3,0,7,4,1,8,5,2]
+    Rot180 = [8,7,6,5,4,3,2,1,0]
+    Rot270 = [2,5,8,1,4,7,0,3,6]
+    VertFlip= [2,1,0,5,4,3,8,7,6]
+    Transformations = [[Rot90],[Rot180],[Rot270],[VertFlip],[Rot90,VertFlip],[Rot180,VertFlip],[Rot270,VertFlip]]
+    #now go thru each item in the list and remove
+    to_return = {}
+    #i think having a for i in range(len(set)) and then indexing thru
+    #each after that is ok, b/c all the iterations prior to the current set we
+    #are on have already been compared w this one. no point in a double comparison
+    length = len(set_boards)
+    list_boards = list(set_boards)
+    for i in range(length):
+        #make the 7 transformations of this board
+        board = list_boards[i]
+        print("processing board: ")
+        print_board(board)
+        #for j in range(i+1, length):
+
+            #make comparisons w i's transformations and all the other elements. if
+            #they're the same, don't add to to_return. if non are the same, then add to to_return
+    return to_return
 '''
 D) Most boards in C) above are reducible to other boards.
 Calculate the number of irreducible board families.
@@ -204,11 +223,23 @@ All the boards to the right are reducible to each other via
 rotations of 90, 180 and 270 degrees, or a mirror flip plus a
 possible added rotation by 90, 180 or 270 degrees
 '''
-def D():
-    return 0
+def D(total_boards): #take the set from A
+    list_of_sets = [set(), set(), set(), set(), set(), set(), set(), set(), set()]
+    for board in total_boards:
+        #this is problematic b/c it's x, o and _ so they're actually all the same length
+        length = 9 - board.count('_')
+        list_of_sets[length - 1].add(board)
+    #now that that's set up, check for transformations
+    to_return = 0
+    for i in range(9):
+        list_of_sets[i] = without_transformation(list_of_sets[i])
+        to_return += len(list_of_sets[i])
+
+    return to_return
 
 def main():
-    print("A: %d \t B1: %d \t B2: %d \t B3: %d \t C: %d"%(A()))
-    print("D: %d"%D())
+    a, b1, b2, b3, c, total_boards = A()
+    print("A: %d \t B1: %d \t B2: %d \t B3: %d \t C: %d"%(a, b1, b2, b3, c))
+    print("D: %d"%D(total_boards))
 
 main()
