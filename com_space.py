@@ -4,18 +4,6 @@ import sys
 import time
 import copy
 
-'''
-EXAMPLE CLASS
-class SaveState:
-    def __init__(self, ordered, possibilities, board):
-        self.ordered = ordered
-        self.possibilities = possibilities
-        self.board = board
-
-    def print_state(self):
-        print("Print_state. index: %d"%self.ordered[-1])
-        printBoard("board: ", self.board)
-'''
 #thanks mr. brooks
 #globals
 wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
@@ -45,6 +33,7 @@ for at least one value of N.
 def A():
     total_games = 0
     total_boards = set()
+    total_boards.add("_________")
     o_wins = 0
     x_wins = 0
     draws = 0
