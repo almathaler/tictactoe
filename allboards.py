@@ -14,7 +14,7 @@ layouts look like "_x_ox__o_"
 '''
 
 #globals -- thanks mssr. Brooks
-Wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
+wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
 AllBoards = {} # this is a dictionary with key = a layout, and value = its corresponding BoardNode
 
 
@@ -38,7 +38,7 @@ def CreateAllBoards(layout):
         #check if it's a winner, cuz if so obv don't add children
         winner = False
         i = 0
-        while !winner and i < 8:
+        while not(winner) and i < 8:
             if layout[wins[i][0]] != '_' and layout[wins[i][0]] == layout[wins[i][1]] and layout[wins[i][1]] == layout[wins[i][2]]:
                 winner = True
             else:
@@ -62,7 +62,7 @@ def CreateAllBoards(layout):
                 if layout[i] == '_':
                     spots.append(i)
                 i+=1
-            #now fill out the children, these will spawn their own CreateAllBoards calls 
+            #now fill out the children, these will spawn their own CreateAllBoards calls
             children = []
             for spot in spots:
                 child = layout[:spot] + turn + layout[spot+1:]
@@ -99,8 +99,10 @@ def main():
         elif state == 'o':
             owins+=1
         elif state == 'd':
-            dwins+=1
+            draw+=1
         num_children = len(AllBoards[board].children)
         total_children+=num_children
-    print("xwins: %d\t owins: %d\t draws: %d\t not_win: %d\t totalkids: %d\t"%(xwins, owins, draws, not_win, total_children))
+    print("xwins: %d\t owins: %d\t draws: %d\t not_win: %d\t totalkids: %d\t"%(xwins, owins, draw, not_win, total_children))
     return 0
+
+main()
