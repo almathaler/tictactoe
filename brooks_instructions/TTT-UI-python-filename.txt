@@ -1,1 +1,1 @@
-/Users/Alma/Documents/artificial_intelligence/tictactoe/brooks_instructions/TTT-Random-NetLogo.py
+/Users/Alma/Documents/artificial_intelligence/tictactoe/brooks_instructions/TTT-Netlogo-student-template-least.py
