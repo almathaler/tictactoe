@@ -40,24 +40,25 @@ class Tboard:
         self.best_move = None
 
         self.children = [] # list of child Tboards
-#if a win is imminent -- best_move leads to the shortest path
-#if only a draw or lose is possible, choose move that has longest path?
-#No if only a draw and lose are available, do shortest path to a Draw
-#if only lose then choose longest path?
+
 
 def FigureItOut(board):
     '''returns a list: best_move, moves_to_state, and state
     best_move (0-8) is, you know, the best move, unless moves_to_state == 0
     if moves_to_state == 0 then we're at the end of the game
     and state is the expected final state: 'x', 'o', or 'd', for X-winning, O-winning, or Draw'''
+    global AllBoards, wins
     AllBoards.clear()
 
     root = Tboard(board,None)
     AllBoards[board] = root
 
     # Step 1:
-    # Create the board tree starting from this root.
-    FindAllBoards(root)
+    # Create the board tree starting from this root. Don't do this if it's a blank board, b/c we just guess if so
+    if board != '_________':
+        FindAllBoards(root)
+    #just checking:
+    #print(len(AllBoards))
 
     # Step 2:
     # now traverse the game tree (depth first), filling in best_move, moves_to_state and state
@@ -70,12 +71,13 @@ def FindAllBoards(board_node):
     into the dictionary AllBoards.  Uses AllBoards to prevent dublicate boards.  This should
     create a tree of maximum 5478 boards if we start from the empty board.  But usually we won't
     start from the empty board'''
+    global AllBoards, wins
 
     if board_node in AllBoards:
         return
 
     AllBoards[board_node.board] = board_node
-
+    #PrintBoardNode(board_node)
     # is this a final board?
     endboard = IsEndBoard(board_node.board)  # returns 'x' or 'o' or 'd' if final, else None
     if endboard is not None:   # this board is a win for 'x' or 'o' or a draw
@@ -91,24 +93,96 @@ def FindAllBoards(board_node):
         if this_board[i] == '_':
             child_board = this_board[:i]+player+this_board[i+1:]
             child_node = Tboard(child_board,i)
+            #note that the player and opponent switch  ###<-- not sure how necessary this is
+            #not necessary, WhoseMove takes care of that
             board_node.children.append(child_node)
             FindAllBoards(child_node)
+
     return
 
 def CalcBestMove(board_node):
     '''  updates this board_node with correct values for state, moves_to_state, and best_move
-    (This is the engine.)'''
-    #to test that i interact w/ nlogo correctly, j gonna put random stuff here
-    poss = [i for i in range(9) if board_node.board[i] == '_']
-    move = random.choice(poss)
-    board_node.best_move = move
-    board_node.moves_to_state = 2
-    board_node.state = 'd'
+    (This is the engine.)
+    State is a parameter that follows CalcBestMove and ensures you only consider winning boards that are
+    your win,  or draws'''
+    #ok firstly, if it's the first move ('_________' & board_node.player == 'x'),
+    #just choose either 0, 1 or 3
+    if board_node.board == '_________':
+        print("empty board")
+        first_move = [0, 1, 3]
+        move = random.choice(first_move)
+        board_node.best_move = move
+        board_node.moves_to_state = -1
+        board_node.state = None
+    else:
+        isWin = IsEndBoard(board_node.board)
+        #recursion
 
-    ##############################################
-    #   Your excellent code here
-    ##############################################
+        #base case: this is a winning board or full
+        if isWin is not None:
+            board_node.best_move = -1
+            board_node.moves_to_state = 0
+            board_node.state = isWin
+            print("end state board, so: ")
+            PrintBoardNode(board_node)
+            print("\n")
 
+        #base case: you only have one move possible
+
+        elif board_node.board.count('_') == 1:
+            #prepare the variables
+            best_move = board_node.board.find('_') #the last spot
+            play = WhoseMove(board_node.board)
+            play = play[0]
+            future = board_node.board[:best_move] + play + board_node.board[best_move+1:]
+            state = IsEndBoard(future)
+            print("calculated the state of %s, it's %s"%(future, state))
+            #deposit them
+            board_node.best_move, board_node.moves_to_state, board_node.state = best_move, 1, state
+            print("one away from end state board, so: ")
+            PrintBoardNode(board_node)
+            print("\n")
+        
+
+        #recurse
+        else:
+            for child in board_node.children:
+                CalcBestMove(child)
+            #prints
+            print("currently j recursing, on this board: ")
+            print(board_node.board)
+
+            #now make a list of children, sort by child_node.moves_to_state
+            kids = sorted(board_node.children, key=lambda child_node:child_node.moves_to_state)
+            print("kids: ")
+            #print(kids)
+            #and return list.find(child w state = win)
+            winners = [child_node for child_node in kids if child_node.state == board_node.player]
+            print("winners, there are %d: "%len(winners))
+            #print(winners)
+            if len(winners) > 0:
+                #fill in the information based on the first winner
+                board_node.moves_to_state = winners[0].moves_to_state + 1
+                board_node.state = winners[0].state
+                board_node.best_move = winners[0].lastmove
+            else:
+                #find all the draws
+                draws = [child_node for child_node in kids if child_node.state == 'd']
+                print("draws, there are %d: "%len(draws))
+                #print(draws)
+                if len(draws) > 0:
+                    board_node.moves_to_state = draws[0].moves_to_state + 1
+                    board_node.state = 'd'
+                    board_node.best_move = draws[0].lastmove
+                else:
+                    print("have to choose of the losses, which takes longer to hit")
+                    #print(kids[-1])
+                    #we only have losing boards. no need to make a new list, our list is already sorted
+                    board_node.moves_to_state = kids[-1].moves_to_state + 1
+                    board_node.state = kids[-1].state
+                    board_node.best_move = kids[-1].lastmove
+
+    return 0
 def WhoseMove(board):
     '''returns the player (either 'x' or 'o') and also opponent'''
     if board.count('x') == board.count('o'):
@@ -116,6 +190,8 @@ def WhoseMove(board):
     return ['o', 'x']
 
 def IsEndBoard(board):
+    global wins
+
     for awin in wins:
         if board[awin[0]] != '_' and board[awin[0]] == board[awin[1]] and board[awin[1]] == board[awin[2]]:
             return board[awin[0]]
@@ -154,9 +230,11 @@ def main(argv = None):
         f_out.write('\n')
         f_out.write(english_name)
         f_out.write('\n')
-        if state == 'x' or state == 'o':
+        if state is None:
+            prediction = "too early to tell"
+        elif state == 'x' or state == 'o':
             prediction = state + " wins in " + str(moves_to_state) + " moves"
-        if state == 'd':
+        elif state == 'd':
             prediction = "draw in " + str(moves_to_state) + " moves"
         f_out.write(prediction)
     #done
